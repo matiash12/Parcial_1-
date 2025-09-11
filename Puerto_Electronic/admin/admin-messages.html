@@ -47,27 +47,87 @@
                 </div>
             </section>
         </div>
+        </div> <div class="modal-overlay" id="delete-confirm-modal">
+            <div class="modal-content">
+                <h4>Confirmar Eliminación</h4>
+                <p id="modal-text">¿Estás seguro de que deseas eliminar este mensaje?</p>
+                <div class="modal-buttons">
+                    <button class="btn secondary-btn" id="cancel-delete-btn">Cancelar</button>
+                    <button class="btn btn-danger" id="confirm-delete-btn">Sí, Eliminar</button>
+                </div>
+            </div>
+        </div>
+        
     </main>
 
     <script src="../js/scripts.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const messagesTableBody = document.getElementById('messages-table-body');
-            const clearMessagesBtn = document.getElementById('clear-messages-btn');
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- SELECTORES DEL DOM ---
+        const messagesTableBody = document.getElementById('messages-table-body');
+        const clearMessagesBtn = document.getElementById('clear-messages-btn');
+        const deleteModal = document.getElementById('delete-confirm-modal');
+        const modalText = document.getElementById('modal-text');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+        let itemToDelete = null; // Guardará el índice del mensaje o 'all'
 
-            const renderMessages = () => {
-                const messages = JSON.parse(localStorage.getItem('messages')) || [];
-                messagesTableBody.innerHTML = '';
+        // --- FUNCIÓN GLOBAL DE NOTIFICACIÓN ---
+        // (Esta función debe existir en tu scripts.js para que funcione)
+        const showNotification = (message, type = 'success') => {
+            const existing = document.querySelector('.notification-message');
+            if(existing) existing.remove();
+            const notification = document.createElement('div');
+            notification.className = `notification-message ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        };
 
-                if (messages.length === 0) {
-                    messagesTableBody.innerHTML = '<tr><td colspan="5" class="text-center">No hay mensajes recibidos.</td></tr>';
-                    clearMessagesBtn.style.display = 'none';
-                } else {
-                    clearMessagesBtn.style.display = 'block';
-                    messages.forEach((message, index) => {
-                        const row = document.createElement('tr');
-                        const date = new Date(message.timestamp).toLocaleString();
-                        row.innerHTML = `
+        // --- LÓGICA DE LA VENTANA MODAL ---
+        const openModal = (text, index) => {
+            modalText.textContent = text;
+            itemToDelete = index;
+            deleteModal.classList.add('visible');
+        };
+
+        const closeModal = () => {
+            deleteModal.classList.remove('visible');
+            itemToDelete = null;
+        };
+
+        cancelDeleteBtn.addEventListener('click', closeModal);
+
+        confirmDeleteBtn.addEventListener('click', () => {
+            if (itemToDelete === 'all') {
+                // Borrar todos los mensajes
+                localStorage.removeItem('messages');
+                showNotification('Todos los mensajes han sido eliminados.');
+            } else if (itemToDelete !== null) {
+                // Borrar un mensaje individual
+                let messages = JSON.parse(localStorage.getItem('messages')) || [];
+                messages.splice(itemToDelete, 1);
+                localStorage.setItem('messages', JSON.stringify(messages));
+                showNotification('Mensaje eliminado con éxito.');
+            }
+            renderMessages();
+            closeModal();
+        });
+
+        // --- LÓGICA PARA RENDERIZAR Y MANEJAR MENSAJES ---
+        const renderMessages = () => {
+            const messages = JSON.parse(localStorage.getItem('messages')) || [];
+            messagesTableBody.innerHTML = '';
+
+            if (messages.length === 0) {
+                messagesTableBody.innerHTML = '<tr><td colspan="5">No hay mensajes recibidos.</td></tr>';
+                clearMessagesBtn.style.display = 'none';
+            } else {
+                clearMessagesBtn.style.display = 'block';
+                messages.forEach((message, index) => {
+                    const date = new Date(message.timestamp).toLocaleString();
+                    messagesTableBody.innerHTML += `
+                        <tr>
                             <td>${date}</td>
                             <td>${message.nombre}</td>
                             <td>${message.email}</td>
@@ -75,38 +135,28 @@
                             <td>
                                 <button class="btn delete-message-btn" data-index="${index}">Eliminar</button>
                             </td>
-                        `;
-                        messagesTableBody.appendChild(row);
-                    });
-                }
-            };
+                        </tr>
+                    `;
+                });
+            }
+        };
 
-            // Eliminar un mensaje individual
-            messagesTableBody.addEventListener('click', (event) => {
-                if (event.target.classList.contains('delete-message-btn')) {
-                    const messageIndex = parseInt(event.target.dataset.index);
-                    if (confirm('¿Estás seguro de que deseas eliminar este mensaje?')) {
-                        let messages = JSON.parse(localStorage.getItem('messages')) || [];
-                        messages.splice(messageIndex, 1);
-                        localStorage.setItem('messages', JSON.stringify(messages));
-                        showNotification('Mensaje eliminado con éxito.');
-                        renderMessages();
-                    }
-                }
-            });
-
-            // Borrar todos los mensajes
-            clearMessagesBtn.addEventListener('click', () => {
-                if (confirm('¿Estás seguro de que deseas borrar TODOS los mensajes? Esta acción no se puede deshacer.')) {
-                    localStorage.removeItem('messages');
-                    showNotification('Todos los mensajes han sido eliminados.');
-                    renderMessages();
-                }
-            });
-
-            renderMessages();
+        // Event listener para el botón "Borrar todos los mensajes"
+        clearMessagesBtn.addEventListener('click', () => {
+            openModal('¿Estás seguro de que deseas borrar TODOS los mensajes? Esta acción no se puede deshacer.', 'all');
         });
+
+        // Event listener para los botones "Eliminar" individuales
+        messagesTableBody.addEventListener('click', (event) => {
+            if (event.target.classList.contains('delete-message-btn')) {
+                const messageIndex = parseInt(event.target.dataset.index);
+                openModal('¿Estás seguro de que deseas eliminar este mensaje?', messageIndex);
+            }
+        });
+        
+        // Carga inicial de los mensajes
+        renderMessages();
+    });
     </script>
 </body>
-
 </html>
