@@ -1,5 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // --- DATOS PARA SELECTS DE REGIÓN Y COMUNA ---
+    const regionesYcomunas = [
+        {
+            "nombre": "Arica y Parinacota",
+            "comunas": ["Arica", "Camarones", "Putre", "General Lagos"]
+        },
+        {
+            "nombre": "Metropolitana de Santiago",
+            "comunas": ["Santiago", "Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central", "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana", "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón", "Vitacura", "Puente Alto", "Pirque", "San José de Maipo", "Colina", "Lampa", "Tiltil", "San Bernardo", "Buin", "Calera de Tango", "Paine", "Melipilla", "Alhué", "Curacaví", "María Pinto", "San Pedro", "Talagante", "El Monte", "Isla de Maipo", "Padre Hurtado", "Peñaflor"]
+        },
+        {
+            "nombre": "Los Lagos",
+            "comunas": ["Puerto Montt", "Calbuco", "Cochamó", "Fresia", "Frutillar", "Los Muermos", "Llanquihue", "Maullín", "Puerto Varas", "Castro", "Ancud", "Chonchi", "Curaco de Vélez", "Dalcahue", "Puqueldón", "Queilén", "Quellón", "Quemchi", "Quinchao", "Osorno", "Puerto Octay", "Purranque", "Puyehue", "Río Negro", "San Juan de la Costa", "San Pablo", "Chaitén", "Futaleufú", "Hualaihué", "Palena"]
+        }
+    ];
+
+    
+    
+
     // Función para mostrar un mensaje de éxito o error en la pantalla
     function showNotification(message, type = 'success') {
         const existingMessage = document.querySelector('.notification-message');
@@ -17,6 +36,26 @@ document.addEventListener('DOMContentLoaded', () => {
             messageContainer.remove();
         }, 3000);
     }
+
+    //funcion para validar rut version chile
+    const validarRun = (run) => {
+        if (!/^[0-9]+[0-9kK]{1}$/.test(run)) return false;
+        try {
+            let rut = run.slice(0, -1);
+            const dv = run.slice(-1).toLowerCase();
+            let suma = 0;
+            let multiplo = 2;
+            for (let i = rut.length - 1; i >= 0; i--) {
+                suma += parseInt(rut.charAt(i)) * multiplo;
+                multiplo = multiplo < 7 ? multiplo + 1 : 2;
+            }
+            const dvEsperado = 11 - (suma % 11);
+            let dvCalculado = dvEsperado === 11 ? '0' : (dvEsperado === 10 ? 'k' : dvEsperado.toString());
+            return dv === dvCalculado;
+        } catch (err) {
+            return false;
+        }
+    };
 
     // mostrar productos, usuarios y posts de blog
     let products = JSON.parse(localStorage.getItem('products')) || [
@@ -79,45 +118,73 @@ document.addEventListener('DOMContentLoaded', () => {
         allProductsList.innerHTML = products.map(renderProduct).join('');
     }
 
-    // Lógica para validar el formulario de registro
+    // --- Lógica para validar el formulario de registro de la tienda 
     const registroForm = document.getElementById('registroForm');
     if (registroForm) {
+        // --- Carga de Regiones y Comunas ---
+        const regionSelect = document.getElementById('registroRegion');
+        const comunaSelect = document.getElementById('registroComuna');
+
+        if(regionSelect) {
+            regionesYcomunas.forEach(region => {
+                regionSelect.innerHTML += `<option value="${region.nombre}">${region.nombre}</option>`;
+            });
+
+            regionSelect.addEventListener('change', () => {
+                comunaSelect.innerHTML = '<option value="">Seleccione una comuna</option>';
+                const selectedRegion = regionesYcomunas.find(r => r.nombre === regionSelect.value);
+                if (selectedRegion) {
+                    selectedRegion.comunas.forEach(comuna => {
+                        comunaSelect.innerHTML += `<option value="${comuna}">${comuna}</option>`;
+                    });
+                    comunaSelect.disabled = false;
+                } else {
+                    comunaSelect.disabled = true;
+                }
+            });
+        }
+        
+        // --- Validación del Formulario al Enviar ---
         registroForm.addEventListener('submit', (event) => {
             event.preventDefault();
-            let isValid = true;
             document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-            document.getElementById('successMessage').textContent = '';
-            const nombre = document.getElementById('nombre').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-            if (nombre === '') {
-                document.getElementById('errorNombre').textContent = 'El nombre es obligatorio.';
-                isValid = false;
-            } else if (nombre.length > 100) {
-                document.getElementById('errorNombre').textContent = 'El nombre no puede exceder los 100 caracteres.';
+            let isValid = true;
+
+            // Usamos los IDs correctos del formulario de registro
+            const run = document.getElementById('registroRun').value;
+            if (!validarRun(run)) { // Reutilizamos la función validarRun
+                document.getElementById('errorRegistroRun').textContent = 'El RUN no es válido.';
                 isValid = false;
             }
-            const emailPattern = /^[^@]+@(duoc\.cl|profesor\.duoc\.cl|gmail\.com)$/;
-            if (email === '') {
-                document.getElementById('errorEmail').textContent = 'El correo electrónico es obligatorio.';
-                isValid = false;
-            } else if (!emailPattern.test(email)) {
-                document.getElementById('errorEmail').textContent = 'El formato del correo es inválido.';
-                isValid = false;
-            } else if (email.length > 100) {
-                document.getElementById('errorEmail').textContent = 'El correo electrónico no puede exceder los 100 caracteres.';
+
+            const email = document.getElementById('registroEmail').value;
+            if (!/^[^@]+@(duoc\.cl|profesor\.duoc\.cl|gmail\.com)$/.test(email)) {
+                document.getElementById('errorRegistroEmail').textContent = 'El correo debe ser válido.';
                 isValid = false;
             }
-            if (password.length < 4 || password.length > 10) {
-                document.getElementById('errorPassword').textContent = 'La contraseña debe tener entre 4 y 10 caracteres.';
-                isValid = false;
-            }
+
+            // Aquí agregamos el resto de las validaciones de longitud
+
             if (isValid) {
-                const newUser = { nombre, email, password };
+                const newUser = {
+                    run: run,
+                    nombre: document.getElementById('registroNombre').value,
+                    apellidos: document.getElementById('registroApellidos').value,
+                    email: email,
+                    password: document.getElementById('registroPassword').value,
+                    fechaNacimiento: document.getElementById('registroFechaNacimiento').value,
+                    region: regionSelect.value,
+                    comuna: comunaSelect.value,
+                    direccion: document.getElementById('registroDireccion').value,
+                    rol: 'cliente' // Se asigna el rol por defecto
+                };
+
+                let users = JSON.parse(localStorage.getItem('users')) || [];
                 users.push(newUser);
                 localStorage.setItem('users', JSON.stringify(users));
-                document.getElementById('successMessage').textContent = '¡Registro exitoso! Ahora puedes iniciar sesión.';
-                registroForm.reset();
+
+                showNotification('¡Registro exitoso! Ya puedes iniciar sesión.');
+                setTimeout(() => { window.location.href = 'login.html'; }, 2000);
             }
         });
     }
@@ -422,38 +489,7 @@ if (loginForm) {
         });
     }
 
-    // Lógica de gestión de usuarios del admin
-    const usersTableBody = document.getElementById('users-table-body');
-    const renderAdminUsers = () => {
-        if (!usersTableBody) return;
-        usersTableBody.innerHTML = '';
-        users.forEach((user, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${user.nombre}</td>
-                <td>${user.email}</td>
-                <td>
-                    <button class="btn btn-danger delete-user-btn" data-email="${user.email}">Eliminar</button>
-                </td>
-            `;
-            usersTableBody.appendChild(row);
-        });
-    };
-    if (usersTableBody) {
-        renderAdminUsers();
-        usersTableBody.addEventListener('click', (event) => {
-            if (event.target.classList.contains('delete-user-btn')) {
-                const userEmail = event.target.dataset.email;
-                if (confirm('¿Estás seguro de que deseas eliminar a este usuario?')) {
-                    users = users.filter(u => u.email !== userEmail);
-                    localStorage.setItem('users', JSON.stringify(users));
-                    renderAdminUsers();
-                    showNotification('Usuario eliminado con éxito.');
-                }
-            }
-        });
-    }
+    
 
     // --- LÓGICA DE BLOGS ---
     const blogPostsList = document.getElementById('blog-posts-list');
@@ -478,35 +514,190 @@ if (loginForm) {
         renderBlogPosts();
     }
 
-    // Lógica para añadir un nuevo usuario desde el panel de administración
+    // --- Lógica para añadir un nuevo usuario desde el panel de administración ---
     const newUserForm = document.getElementById('newUserForm');
     if (newUserForm) {
+        // --- Carga de Regiones y Comunas ---
+        const regionSelect = document.getElementById('userRegion');
+        const comunaSelect = document.getElementById('userComuna');
+
+        regionesYcomunas.forEach(region => {
+            const option = document.createElement('option');
+            option.value = region.nombre;
+            option.textContent = region.nombre;
+            regionSelect.appendChild(option);
+        });
+
+        regionSelect.addEventListener('change', () => {
+            comunaSelect.innerHTML = '<option value="">Seleccione una comuna</option>';
+            const selectedRegion = regionesYcomunas.find(r => r.nombre === regionSelect.value);
+            if (selectedRegion) {
+                selectedRegion.comunas.forEach(comuna => {
+                    const option = document.createElement('option');
+                    option.value = comuna;
+                    option.textContent = comuna;
+                    comunaSelect.appendChild(option);
+                });
+                comunaSelect.disabled = false;
+            } else {
+                comunaSelect.disabled = true;
+            }
+        });
+
+        // --- Función para validar el RUN chileno  ---
+        const validarRun = (run) => {
+            if (!/^[0-9]+[0-9kK]{1}$/.test(run)) {
+                return false;
+            }
+            try {
+                let rut = run.slice(0, -1);
+                const dv = run.slice(-1).toLowerCase();
+                let suma = 0;
+                let multiplo = 2;
+
+                // Recorrer el RUT de derecha a izquierda
+                for (let i = rut.length - 1; i >= 0; i--) {
+                    suma += parseInt(rut.charAt(i)) * multiplo;
+                    multiplo = multiplo < 7 ? multiplo + 1 : 2;
+                }
+
+                const dvEsperado = 11 - (suma % 11);
+                let dvCalculado;
+
+                if (dvEsperado === 11) {
+                    dvCalculado = '0';
+                } else if (dvEsperado === 10) {
+                    dvCalculado = 'k';
+                } else {
+                    dvCalculado = dvEsperado.toString();
+                }
+
+                return dv === dvCalculado;
+            } catch (err) {
+                return false;
+            }
+        };
+        
+        // --- Validación del Formulario al Enviar ---
         newUserForm.addEventListener('submit', (event) => {
             event.preventDefault();
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+            let isValid = true;
 
-            const userName = document.getElementById('userName').value;
-            const userEmail = document.getElementById('userEmail').value;
-            const userPassword = document.getElementById('userPassword').value;
-            const userRol = document.getElementById('userRol').value;
+            const run = document.getElementById('userRun').value;
+            if (!validarRun(run)) {
+                document.getElementById('errorUserRun').textContent = 'El RUN no es válido.';
+                isValid = false;
+            }
 
-            const newUser = {
-                nombre: userName,
-                email: userEmail,
-                password: userPassword,
-                rol: userRol
-            };
+            const nombre = document.getElementById('userName').value;
+            if (nombre.length > 50) {
+                document.getElementById('errorUserName').textContent = 'El nombre no debe exceder los 50 caracteres.';
+                isValid = false;
+            }
 
-            let users = JSON.parse(localStorage.getItem('users')) || [];
-            users.push(newUser);
-            localStorage.setItem('users', JSON.stringify(users));
+            const apellidos = document.getElementById('userApellidos').value;
+            if (apellidos.length > 100) {
+                document.getElementById('errorUserApellidos').textContent = 'Los apellidos no deben exceder los 100 caracteres.';
+                isValid = false;
+            }
 
-            // Muestra un mensaje de éxito y redirige
-            showNotification('Usuario agregado con éxito.');
-            setTimeout(() => {
-                window.location.href = 'admin-users.html';
-            }, 1500); // Pequeño retraso para que el mensaje sea visible
+            const email = document.getElementById('userEmail').value;
+            if (!/^[^@]+@(duoc\.cl|profesor\.duoc\.cl|gmail\.com)$/.test(email)) {
+                document.getElementById('errorUserEmail').textContent = 'El correo debe ser @duoc.cl, @profesor.duoc.cl o @gmail.com.';
+                isValid = false;
+            }
+
+            const direccion = document.getElementById('userDireccion').value;
+             if (direccion.length > 300) {
+                document.getElementById('errorUserDireccion').textContent = 'La dirección no debe exceder los 300 caracteres.';
+                isValid = false;
+            }
+
+            if (isValid) {
+                const newUser = {
+                    run: run,
+                    nombre: nombre,
+                    apellidos: apellidos,
+                    email: email,
+                    password: document.getElementById('userPassword').value,
+                    fechaNacimiento: document.getElementById('userFechaNacimiento').value,
+                    region: regionSelect.value,
+                    comuna: comunaSelect.value,
+                    direccion: direccion,
+                    rol: document.getElementById('userRol').value
+                };
+
+                let users = JSON.parse(localStorage.getItem('users')) || [];
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+
+                showNotification('Usuario agregado con éxito.');
+                setTimeout(() => { window.location.href = 'admin-users.html'; }, 1500);
+            }
         });
     }
+
+
+    // --- LÓGICA PARA LISTAR Y ELIMINAR USUARIOS EN admin-users.html (CON MODAL) ---
+    const usersTableBody = document.getElementById('users-table-body');
+    
+    if (usersTableBody) {
+        const deleteModal = document.getElementById('delete-confirm-modal');
+        const userEmailSpan = document.getElementById('user-email-to-delete');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+        let userEmailToDelete = null;
+
+        const renderAdminUsers = () => {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            usersTableBody.innerHTML = '';
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.nombre}</td>
+                    <td>${user.email}</td>
+                    <td>${user.rol || 'Cliente'}</td>
+                    <td>
+                        <button class="btn btn-danger delete-user-btn" data-email="${user.email}">Eliminar</button>
+                    </td>
+                `;
+                usersTableBody.appendChild(row);
+            });
+        };
+
+        // 1.logica para Abrir la ventana modal al hacer clic en "Eliminar"
+        usersTableBody.addEventListener('click', (event) => {
+            if (event.target.classList.contains('delete-user-btn')) {
+                userEmailToDelete = event.target.dataset.email;
+                userEmailSpan.textContent = userEmailToDelete; // Muestra el email en la ventana
+                deleteModal.classList.add('visible'); // Muestra la ventana
+            }
+        });
+
+        // 2. logica para Cerrar la ventana modal al hacer clic en "Cancelar"
+        cancelDeleteBtn.addEventListener('click', () => {
+            deleteModal.classList.remove('visible');
+            userEmailToDelete = null;
+        });
+
+        // 3. logica para Ejecutar la eliminación al hacer clic en "Sí, Eliminar"
+        confirmDeleteBtn.addEventListener('click', () => {
+            if (userEmailToDelete) {
+                let users = JSON.parse(localStorage.getItem('users')) || [];
+                users = users.filter(u => u.email !== userEmailToDelete);
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                showNotification('Usuario eliminado con éxito.'); // Usa la función de notificación verde
+                renderAdminUsers(); // Actualiza la tabla
+                
+                deleteModal.classList.remove('visible'); // Oculta la ventana
+                userEmailToDelete = null;
+            }
+        });
+
+        // Renderizar la tabla al cargar la página
+        renderAdminUsers();
+    }
 });
-
-
