@@ -1,23 +1,23 @@
 /* Estilos específicos para el panel de administración */
 
 :root {
-    --admin-bg-page: #222d32; /* Fondo de la página, un gris muy oscuro */
-    --admin-bg-container: #2e2b35; /* Fondo principal del contenedor, un gris azulado oscuro */
-    --admin-sidebar-bg: #1a2226; /* Negro casi para la barra lateral, más oscuro que el fondo general */
-    --admin-sidebar-text: #b8c7ce; /* Gris claro para el texto de la barra lateral */
-    --admin-sidebar-hover: #367fa9; /* Azul más claro al pasar el mouse para contraste */
-    --admin-content-bg: #2e2b35; /* Fondo del área de contenido, igual que el container */
-    --admin-content-text: #ecf0f1; /* Gris claro para el texto del contenido */
-    --admin-title-color: #f8f9fa; /* Blanco brillante para los títulos */
-    --admin-table-header-bg: #343a40; /* Gris oscuro para el encabezado de la tabla */
-    --admin-table-border: #495057; /* Gris más oscuro para los bordes de la tabla */
-    --admin-btn-primary: #007bff; /* Azul vibrante para botones principales */
-    --admin-btn-primary-hover: #0056b3; /* Azul más oscuro al pasar el mouse */
-    --admin-btn-danger: #dc3545; /* Rojo para botones de peligro */
-    --admin-btn-danger-hover: #bd2130; /* Rojo más oscuro al pasar el mouse */
-    --admin-form-border: #6c757d; /* Gris para bordes de formularios */
-    --admin-form-input-bg: #343a40; /* Fondo oscuro para inputs */
-    --admin-form-input-text: #ecf0f1; /* Texto claro para inputs */
+    --admin-bg-page: #222d32; 
+    --admin-bg-container: #2e2b35; 
+    --admin-sidebar-bg: #1a2226; 
+    --admin-sidebar-text: #b8c7ce; 
+    --admin-sidebar-hover: #367fa9; 
+    --admin-content-bg: #2e2b35; 
+    --admin-content-text: #ecf0f1; 
+    --admin-title-color: #f8f9fa; 
+    --admin-table-header-bg: #343a40; 
+    --admin-table-border: #495057; 
+    --admin-btn-primary: #007bff; 
+    --admin-btn-primary-hover: #0056b3; 
+    --admin-btn-danger: #dc3545; 
+    --admin-btn-danger-hover: #bd2130; 
+    --admin-form-border: #6c757d; 
+    --admin-form-input-bg: #343a40; 
+    --admin-form-input-text: #ecf0f1; 
 }
 
 .admin-page {
@@ -252,4 +252,76 @@ h2, h3 {
 
 .read-more-link:hover {
     text-decoration: underline;
+}
+
+/* --- Estilos para el Título con Logo en el Header --- */
+.header-title {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centra el logo y el texto juntos */
+    gap: 15px;               /* Espacio entre el logo y el texto */
+    margin: 0;
+}
+
+.header-logo {
+    height: 50px; /* Altura del logo. Puedes ajustarlo si lo necesitas */
+    width: auto;  /* El ancho se ajusta automáticamente */
+}
+
+/* --- Estilos para la Ventana Modal de Confirmación --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro semitransparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background-color: var(--admin-bg-container, #2e2b35);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    color: var(--admin-content-text, #ecf0f1);
+    width: 90%;
+    max-width: 400px;
+}
+
+.modal-content h4 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: var(--admin-title-color, #f8f9fa);
+}
+
+.modal-buttons {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+
+
+.form-row {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+}
+
+.form-row .form-group {
+        flex: 1;
 }
