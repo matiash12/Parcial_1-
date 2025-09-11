@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Añadir Usuario - Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="css/admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <main class="admin-page">
+        <div class="admin-container">
+            <aside class="admin-sidebar">
+                <h2 class="admin-title">Panel de Administración</h2>
+                <nav class="admin-nav">
+                    <ul>
+                         <li><a href="admin-home.html"><i class="fas fa-home"></i> Inicio</a></li>
+                        <li><a href="admin-products.html"><i class="fas fa-box-open"></i> Productos</a></li>
+                        <li><a href="admin-users.html" class="active"><i class="fas fa-users"></i> Usuarios</a></li>
+                        <li><a href="admin-messages.html"><i class="fas fa-envelope"></i> Mensajes</a></li>
+                        <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                    </ul>
+                </nav>
+            </aside>
+            <section class="admin-content">
+                <h3>Añadir Nuevo Usuario</h3>
+                <form id="newUserForm" class="admin-form">
+    <div class="form-row">
+        <div class="form-group">
+            <label for="userRun">Run:</label>
+            <input type="text" id="userRun" name="userRun" required minlength="7" maxlength="9" placeholder="Ej: 19011022K">
+            <p class="error-message" id="errorUserRun"></p>
+        </div>
+        <div class="form-group">
+            <label for="userName">Nombre:</label>
+            <input type="text" id="userName" name="userName" required maxlength="50">
+            <p class="error-message" id="errorUserName"></p>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="userApellidos">Apellidos:</label>
+            <input type="text" id="userApellidos" name="userApellidos" required maxlength="100">
+            <p class="error-message" id="errorUserApellidos"></p>
+        </div>
+        <div class="form-group">
+            <label for="userEmail">Email:</label>
+            <input type="email" id="userEmail" name="userEmail" required maxlength="100">
+            <p class="error-message" id="errorUserEmail"></p>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="userPassword">Contraseña:</label>
+            <input type="password" id="userPassword" name="userPassword" required>
+            <p class="error-message" id="errorUserPassword"></p>
+        </div>
+        <div class="form-group">
+            <label for="userFechaNacimiento">Fecha Nacimiento: (Opcional)</label>
+            <input type="date" id="userFechaNacimiento" name="userFechaNacimiento">
+        </div>
+    </div>
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label for="userRegion">Región:</label>
+            <select id="userRegion" name="userRegion" required>
+                <option value="">Seleccione una región</option>
+            </select>
+            <p class="error-message" id="errorUserRegion"></p>
+        </div>
+        <div class="form-group">
+            <label for="userComuna">Comuna:</label>
+            <select id="userComuna" name="userComuna" required disabled>
+                <option value="">Seleccione una comuna</option>
+            </select>
+            <p class="error-message" id="errorUserComuna"></p>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="userDireccion">Dirección:</label>
+            <textarea id="userDireccion" name="userDireccion" required maxlength="300"></textarea>
+            <p class="error-message" id="errorUserDireccion"></p>
+        </div>
+        <div class="form-group">
+            <label for="userRol">Rol:</label>
+            <select id="userRol" name="userRol" required>
+                <option value="cliente">Cliente</option>
+                <option value="vendedor">Vendedor</option>
+                <option value="administrador">Administrador</option>
+            </select>
+        </div>
+    </div>
+
+    <button type="submit" class="btn">Guardar Usuario</button>
+    <a href="admin-users.html" class="btn secondary-btn">Cancelar</a>
+</form>
+<style>
+    .form-row {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+    }
+    .form-row .form-group {
+        flex: 1;
+    }
+</style>
+
+            </section>
+        </div>
+    </main>
+    <script src="../js/scripts.js"></script>
+</body>
+</html>
